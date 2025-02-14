@@ -18,8 +18,6 @@ impl Display for AppError {
     }
 }
 
-impl std::error::Error for AppError {}
-
 impl AppError {
     pub fn new(code: StatusCode, message: impl ToString) -> Self {
         Self {
