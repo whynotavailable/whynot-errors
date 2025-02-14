@@ -2,6 +2,8 @@
 name = "whynot-errors"
 version = "0.1.0"
 edition = "2021"
+description = "A basic setup for app errors in axum"
+license = "MIT"
 
 [dependencies]
-axum = "0.8.1"
+axum = "~0.8.1"
