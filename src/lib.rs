@@ -54,6 +54,14 @@ impl AppError {
             message: obj.to_string(),
         }
     }
+
+    /// Return a closure which will accept a ToString to generate an AppError
+    pub fn fact<T: ToString>(code: StatusCode) -> impl Fn(T) -> Self {
+        move |obj| Self {
+            code,
+            message: obj.to_string(),
+        }
+    }
 }
 
 impl IntoResponse for AppError {
@@ -64,8 +72,11 @@ impl IntoResponse for AppError {
 
 /// Use this for most functions that return a result
 pub type AppResult<T> = Result<T, AppError>;
+
+/// If you are returning JSON, use this as well.
 pub type JsonResult<T> = AppResult<Json<T>>;
 
+/// Shortcut to wrap a result in json. Will consume the input, but that shouldn't matter.
 pub fn json_ok<T>(obj: T) -> JsonResult<T> {
     Ok(Json(obj))
 }
@@ -107,5 +118,18 @@ mod tests {
             AppError::new(StatusCode::FORBIDDEN, "hi".to_string()).message,
             "hi"
         );
+    }
+
+    #[test]
+    fn test_fact() {
+        let r: Result<(), String> = Err("hi".to_string());
+        let mapped = r.map_err(AppError::fact(StatusCode::METHOD_NOT_ALLOWED));
+
+        assert!(mapped.is_err());
+
+        let e = mapped.unwrap_err();
+
+        assert_eq!(e.code, StatusCode::METHOD_NOT_ALLOWED);
+        assert_eq!(e.message, "hi");
     }
 }
