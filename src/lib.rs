@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::response::{Html, IntoResponse, Response};
 use axum::Json;
 
 /// Global error type
@@ -73,12 +73,20 @@ impl IntoResponse for AppError {
 /// Use this for most functions that return a result
 pub type AppResult<T> = Result<T, AppError>;
 
-/// If you are returning JSON, use this as well.
+/// If you are returning JSON, use this.
 pub type JsonResult<T> = AppResult<Json<T>>;
 
-/// Shortcut to wrap a result in json. Will consume the input, but that shouldn't matter.
+/// Shortcut to wrap a result in json. Will consume the input.
 pub fn json_ok<T>(obj: T) -> JsonResult<T> {
     Ok(Json(obj))
+}
+
+/// If you are returning HTML, use this.
+pub type HtmlResult = AppResult<Html<String>>;
+
+/// Shortcut to wrap a result in html. Will consume the input.
+pub fn html_ok(s: String) -> HtmlResult {
+    Ok(Html(s))
 }
 
 #[cfg(test)]
