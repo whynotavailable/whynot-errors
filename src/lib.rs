@@ -56,7 +56,7 @@ impl AppError {
     }
 
     /// Return a closure which will accept a ToString to generate an AppError
-    pub fn fact<T: ToString>(code: StatusCode) -> impl Fn(T) -> Self {
+    pub fn code<T: ToString>(code: StatusCode) -> impl Fn(T) -> Self {
         move |obj| Self {
             code,
             message: obj.to_string(),
@@ -85,8 +85,8 @@ pub fn json_ok<T>(obj: T) -> JsonResult<T> {
 pub type HtmlResult = AppResult<Html<String>>;
 
 /// Shortcut to wrap a result in html. Will consume the input.
-pub fn html_ok(s: String) -> HtmlResult {
-    Ok(Html(s))
+pub fn html_ok(s: impl ToString) -> HtmlResult {
+    Ok(Html(s.to_string()))
 }
 
 #[cfg(test)]
@@ -129,9 +129,9 @@ mod tests {
     }
 
     #[test]
-    fn test_fact() {
+    fn test_code() {
         let r: Result<(), String> = Err("hi".to_string());
-        let mapped = r.map_err(AppError::fact(StatusCode::METHOD_NOT_ALLOWED));
+        let mapped = r.map_err(AppError::code(StatusCode::METHOD_NOT_ALLOWED));
 
         assert!(mapped.is_err());
 
