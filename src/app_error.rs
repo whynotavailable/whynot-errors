@@ -3,6 +3,7 @@ use std::fmt::Display;
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
 use axum::Json;
+use tracing::{error, warn};
 
 /// Global error type
 /// Use in basically all scenarios where an error is needed.
@@ -22,6 +23,8 @@ impl AppError {
     /// Create a new `AppError` from any `ToString` with a code 500.
     /// If you want to customize the code, use the `AppError::code` factory.
     pub fn new(obj: impl ToString) -> Self {
+        error!("Server Error {}", obj.to_string());
+
         Self {
             code: StatusCode::INTERNAL_SERVER_ERROR,
             message: obj.to_string(),
@@ -39,9 +42,13 @@ impl AppError {
 
     /// Return a closure which will accept a ToString to generate an AppError
     pub fn code<T: ToString>(code: StatusCode) -> impl Fn(T) -> Self {
-        move |obj| Self {
-            code,
-            message: obj.to_string(),
+        move |obj| {
+            warn!(code = code.as_u16(), message = obj.to_string(), "Error");
+
+            Self {
+                code,
+                message: obj.to_string(),
+            }
         }
     }
 }
